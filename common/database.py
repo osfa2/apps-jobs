@@ -1,5 +1,5 @@
 import os
-import mysql.connector
+import MySQLdb
 from dotenv import load_dotenv
 
 class Database:
@@ -12,7 +12,7 @@ class Database:
         password =  os.environ['PASSWORD']
         db_name =  os.environ['DB_NAME']
 
-        self.connection = mysql.connector.connect(
+        self.connection = MySQLdb.connect(
             user=user_name, 
             password=password,
             host=host,

@@ -1,0 +1,5 @@
+python-dotenv==1.0.1
+python-gnupg==0.5.3
+mysql==0.0.3
+chardet==5.2.0
+python-dateutil==2.9.0
