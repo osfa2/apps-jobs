@@ -164,10 +164,22 @@ class Form_116:
             self.form_116_submit_dt = datetime.now().strftime('%Y-%m-%d')
 
         if(values[11]):
-            self.form_116_can = values[11].replace('"', '').strip()
+            if(len(values[11]) > 9):
+                can_len = len(values[11])
+                remainder  = can_len - 9
+                self.form_116_can = values[11].replace('"', '').strip()[remainder:can_len]
+            else:    
+                self.form_116_can = values[11].replace('"', '').strip()
+            
             self.form_116_name = values[10].replace('"', '').strip().upper() + ", " + values[9].replace('"', '').strip().upper()
         else:
-            self.form_116_can = values[6].replace('"', '').strip()
+            if(len(values[6]) > 9):
+                can_len = len(values[11])
+                remainder  = can_len - 9
+                self.form_116_can = values[6].replace('"', '').strip()[remainder:can_len]
+            else:
+                self.form_116_can = values[6].replace('"', '').strip()
+            
             self.form_116_name = values[4].replace('"', '').strip().upper() + ", " + values[5].replace('"', '').strip().upper()
 
     def get_form_116_usesession():

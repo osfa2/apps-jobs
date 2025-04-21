@@ -42,7 +42,7 @@ def process_files():
                     new_id = Form_132.insert_form_132(
                         form_132.form_132_can,
                         form_132.form_132_ssn,
-                        form_132.form_132_name,
+                        form_132.form_132_name.replace("'", "\'"),
                         form_132.form_132_phone,
                         form_132.form_132_email,
                         form_132.form_132_submit_dt,
