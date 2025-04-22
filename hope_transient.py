@@ -12,12 +12,14 @@ def process_files():
     #   SET DIRECTORY VARIABLES
     working_dir = os.environ['HT_WORKING_DIR']
     new_folder = os.environ['HT_NEW_FOLDER']
+    _form_132 = Form_132()
 
     #   GET MATCHING FILES
-    files = Common.get_files_by_regex(working_dir, "^HOPE\\+Transient.*\\.csv$")
+    # files = Common.get_files_by_regex(working_dir, "^HOPE\\+Transient.*\\.csv$")
+    files = Common.get_files_by_regex(working_dir, "new 2.csv")
 
     #   GET ALL OF THE USER SESSIONS FROM FORM_132 - THIS IS USED TO MAKE SURE NO DUPLICATES
-    use_sessions = Form_132.get_form_132_usesession()
+    use_sessions = _form_132.get_form_132_usesession()
 
     number_of_files = 0
     number_of_records = 0
@@ -36,13 +38,13 @@ def process_files():
             #   LOOP THROUGH THE LINES OF THE FILES
             for line in lines:
                 #   CREATE FORM 132
-                form_132 = Form_132(line)
+                form_132 = _form_132.parse_line(line)
                 #   MAKE SURE THE USER SESSION IS UNIQUE
                 if not(Common.contains_value(use_sessions, (int(form_132.form_132_usession),))):
-                    new_id = Form_132.insert_form_132(
+                    new_id = _form_132.insert_form_132(
                         form_132.form_132_can,
                         form_132.form_132_ssn,
-                        form_132.form_132_name.replace("'", "\'"),
+                        form_132.form_132_name,
                         form_132.form_132_phone,
                         form_132.form_132_email,
                         form_132.form_132_submit_dt,
@@ -56,7 +58,7 @@ def process_files():
                     )
                     #   NUMBER OF ROWS INSERTED
                     number_inserted += 1
-                    Form_132.insert_tracking_record(new_id)
+                    _form_132.insert_tracking_record(new_id)
 
         #   COPY FILE TO PROCESSED FOLDER
         new_file_path = Common.copy_and_rename(f, new_folder, "PROCESSED_-_" + Common.get_filename_from_path(f))

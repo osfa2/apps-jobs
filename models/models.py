@@ -1,53 +1,54 @@
 from dateutil import parser
 from datetime import datetime
-from common.database import Database
+from .database import Database 
 
 class Form_132:
+    def __init__(self):
+        self.db = Database()
     
-    def __init__(self, line):
-        #   SPLIT THE LINE BY THE COMMAS
-        values = line.split(',')
+    def parse_line(self, line):
+        if line:
+            #   SPLIT THE LINE BY THE COMMAS
+            values = line.split(',')
 
-        self.form_132_term = values[0].upper()
-        #   LINE HAS QUOTES AROUND SCHOOL
-        self.form_132_school = values[1].replace('\t', '').replace('"', '').strip().upper()
-        self.form_132_abroad = values[2][:1]
-        self.form_132_hours_enrolling = values[3]
-        self.form_132_ssn = '999999999'
-        self.form_132_phone = ''
-        self.form_132_export_dt = ''
-        self.form_132_fafsa = ''
-        if(values[10]):
-            self.form_132_usession = values[10].strip()
-        else:
-            self.form_132_usession = '999999'
+            self.form_132_term = values[0].upper()
+            #   LINE HAS QUOTES AROUND SCHOOL
+            self.form_132_school = values[1].replace('\t', '').replace('"', '').strip().upper()
+            self.form_132_abroad = values[2][:1]
+            self.form_132_hours_enrolling = values[3]
+            self.form_132_ssn = '999999999'
+            self.form_132_phone = ''
+            self.form_132_export_dt = ''
+            self.form_132_fafsa = ''
+            if(values[10]):
+                self.form_132_usession = values[10].strip()
+            else:
+                self.form_132_usession = '999999'
 
-        if(values[11]):
-            self.form_132_submit_dt = parser.parse(values[11]).strftime('%Y-%m-%d').strip()
-        else:
-            self.form_132_submit_dt = datetime.now().strftime('%Y-%m-%d')
+            if(values[11]):
+                self.form_132_submit_dt = parser.parse(values[11]).strftime('%Y-%m-%d').strip()
+            else:
+                self.form_132_submit_dt = datetime.now().strftime('%Y-%m-%d')
 
-        if(not(values[15])):
-            self.form_132_can = values[7].replace('"', '').strip()[-9:]
-            self.form_132_name = values[5].replace('"', '').strip().upper() + ", " + values[6].replace('"', '').strip().upper()
-            self.form_132_email = values[8].strip()
-        else:
-            self.form_132_can = values[14].replace('"', '').strip()[-9:]
-            self.form_132_name = values[13].replace('"', '').strip().upper() + ", " + values[12].replace('"', '').strip().upper()
-            self.form_132_email = values[15].strip() + '@uga.edu'
+            if(not(values[15])):
+                self.form_132_can = values[7].replace('"', '').strip()[-9:]
+                self.form_132_name = values[5].replace("'", "''").replace('"', '').strip().upper() + ", " + values[6].replace('"', '').strip().upper()
+                self.form_132_email = values[8].strip()
+            else:
+                self.form_132_can = values[14].replace('"', '').strip()[-9:]
+                self.form_132_name = values[13].replace("'", "''").replace('"', '').strip().upper() + ", " + values[12].replace('"', '').strip().upper()
+                self.form_132_email = values[15].strip() + '@uga.edu'
 
+            return self
 
-    @staticmethod
-    def get_form_132_usesession():
-        db = Database()
+    def get_form_132_usesession(self):
         q = "Select form_132_usession from forms.form_132 where form_132_usession is not null order by form_132_id desc"
-        records = db.select(query=q)
+        records = self.db.select(query=q)
 
-        db.close()
         return records
-
-    @staticmethod
+    
     def insert_form_132(
+        self,
         form_132_can,
         form_132_ssn,
         form_132_name,
@@ -62,8 +63,7 @@ class Form_132:
         form_132_hours_enrolling,
         form_132_fafsa
     ):
-        db = Database()
-
+        
         query = f"""INSERT INTO forms.form_132
             (form_132_can,
             form_132_ssn,
@@ -77,8 +77,8 @@ class Form_132:
             form_132_term,
             form_132_hours_enrolling,
             form_132_fafsa)
-            VALUES
-            ('{form_132_can}',
+            SELECT
+            '{form_132_can}',
             '{form_132_ssn}',
             '{form_132_name}',
             '{form_132_phone}',
@@ -89,16 +89,13 @@ class Form_132:
             '{form_132_school}',
             '{form_132_term}',
             '{form_132_hours_enrolling}',
-            '{form_132_fafsa}');"""
+            '{form_132_fafsa}';"""
         
-        new_id = db.insert_data(query=query)
-        db.close()
+        new_id = self.db.insert_data(query=query)
 
         return new_id
-
-    @staticmethod
-    def insert_tracking_record(form_132_id):
-        db = Database()
+    
+    def insert_tracking_record(self, form_132_id):
 
         query = f"""INSERT INTO forms.form_132_tracking
             (form_132_tracking_id,
@@ -135,8 +132,7 @@ class Form_132:
             NULL,
             NULL);"""
 
-        new_id = db.insert_data(query=query)
-        db.close()
+        new_id = self.db.insert_data(query=query)
 
         return new_id
 
@@ -144,6 +140,7 @@ class Form_132:
 class Form_116:
     
     def __init__(self, line):
+        self.db = Database
         #   SPLIT THE LINE BY THE COMMAS
         values = line.split(',')
 
@@ -171,7 +168,7 @@ class Form_116:
             else:    
                 self.form_116_can = values[11].replace('"', '').strip()
             
-            self.form_116_name = values[10].replace('"', '').strip().upper() + ", " + values[9].replace('"', '').strip().upper()
+            self.form_116_name = values[10].replace("'", "''").replace('"', '').strip().upper() + ", " + values[9].replace('"', '').strip().upper()
         else:
             if(len(values[6]) > 9):
                 can_len = len(values[11])
@@ -180,17 +177,16 @@ class Form_116:
             else:
                 self.form_116_can = values[6].replace('"', '').strip()
             
-            self.form_116_name = values[4].replace('"', '').strip().upper() + ", " + values[5].replace('"', '').strip().upper()
+            self.form_116_name = values[4].replace("'", "''").replace('"', '').strip().upper() + ", " + values[5].replace('"', '').strip().upper()
 
-    def get_form_116_usesession():
-        db = Database()
+    def get_form_116_usesession(self):
         q = "Select form_116_usession from forms.form_116 where form_116_usession is not null order by form_116_id desc"
-        records = db.select(query=q)
+        records = self.db.select(query=q)
 
-        db.close()
         return records
     
     def insert_form_116(
+        self,
         form_116_can,
         form_116_ssn,
         form_116_name,
@@ -200,7 +196,6 @@ class Form_116:
         form_116_term,
         form_116_school
     ):
-        db = Database()
 
         query = f"""
             INSERT INTO `forms`.`form_116`
@@ -224,7 +219,6 @@ class Form_116:
             '{form_116_term}',
             '{form_116_school}');"""
             
-        new_id = db.insert_data(query=query)
-        db.close()
+        new_id = self.db.insert_data(query=query)
 
         return new_id
